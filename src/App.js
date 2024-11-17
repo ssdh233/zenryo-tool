@@ -1,23 +1,26 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import Edit from "./Edit";
 
 function App() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isEdit = urlParams.get("edit") === "1";
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {isEdit ? (
+        <Edit />
+      ) : (
+        <div>
+          Not in edit mode.{" "}
+          <button
+            onClick={() => {
+              urlParams.set("edit", "1");
+              window.location.search = urlParams.toString();
+            }}
+          >
+            Go to Edit
+          </button>
+        </div>
+      )}
     </div>
   );
 }
