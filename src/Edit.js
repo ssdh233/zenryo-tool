@@ -1,6 +1,18 @@
+import { useState } from "react";
+
 function Edit() {
+  // START, DOT1, DOT2
+  // SELECTING (for copying, deleting)
+  // SELECTING_DOT1, SELECTING_DOT2?
+  const [state, setState] = useState("START");
+  const [dot1, setDot1] = useState(null);
+  const [dot2, setDot2] = useState(null);
+
+  const [blocks, setBlocks] = useState([]);
   return (
-    <div className="w-3/4 mx-auto">
+    <div className="" onClick={(event) => {
+        console.log("TODO get x and y axis");
+    }}>
       <img
         className="w-full"
         src="https://pbs.twimg.com/media/FH2n81tacAY4oxl?format=jpg&name=large"
