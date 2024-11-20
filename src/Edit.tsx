@@ -12,6 +12,8 @@ function Edit() {
   const [blocks, setBlocks] = useState([]);
   const divEl = useRef<HTMLDivElement>(null);
 
+  const [scale, setScale] = useState(1);
+
   useEffect(() => {
     window.addEventListener("resize", () => {
       console.log(divEl.current?.getBoundingClientRect().width);
@@ -22,12 +24,37 @@ function Edit() {
   // TODO canvas or DOM?
   return (
     <>
-      <Button variant="outline" size="icon">
-        +
-      </Button>
-      <Button variant="outline" size="icon">
-        -
-      </Button>
+      <div className="flex items-center">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setScale((x) => x - 1)}
+        >
+          -
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setScale((x) => x - 0.1)}
+        >
+          -
+        </Button>
+        {Math.round(Math.floor(scale * 1000) / 10)}%
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setScale((x) => x + 0.1)}
+        >
+          +
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setScale((x) => x + 1)}
+        >
+          +
+        </Button>
+      </div>
       <div
         className=""
         onClick={(event) => {
@@ -46,6 +73,10 @@ function Edit() {
           src="https://pbs.twimg.com/media/FH2n81tacAY4oxl?format=jpg&name=large"
           // src="https://pbs.twimg.com/media/GQmM9GtakAAC8lm?format=jpg&name=large"
           alt="target"
+          style={{
+            width: `${Math.round(Math.floor(scale * 1000) / 10)}%`,
+            maxWidth: `${Math.round(Math.floor(scale * 1000) / 10)}%`,
+          }}
         />
         {dot1 && <div></div>}
       </div>
