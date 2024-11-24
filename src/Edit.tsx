@@ -14,11 +14,68 @@ function Edit() {
 
   const [scale, setScale] = useState(1);
 
+  const [isAltPressing, setIsALtPressing] = useState(false);
   useEffect(() => {
     window.addEventListener("resize", () => {
       console.log(divEl.current?.getBoundingClientRect().width);
     });
   });
+
+  useEffect(() => {
+    const keyBoardEvent = (event: KeyboardEvent) => {
+      if (event.key === ".") {
+        setScale((x) => x + 0.1);
+      }
+
+      if (event.key === ",") {
+        setScale((x) => x - 0.1);
+      }
+    };
+    window.addEventListener("keydown", keyBoardEvent);
+
+    return () => window.removeEventListener("keydown", keyBoardEvent);
+  }, []);
+
+  useEffect(() => {
+    const keyDown = (event: KeyboardEvent) => {
+      if (event.key === "Alt") {
+        event.preventDefault();
+        setIsALtPressing(true);
+      }
+    };
+
+    const keyUp = (event: KeyboardEvent) => {
+      if (event.key === "Alt") {
+        event.preventDefault();
+        setIsALtPressing(false);
+      }
+    };
+    window.addEventListener("keydown", keyDown);
+    window.addEventListener("keyup", keyUp);
+
+    return () => {
+      window.removeEventListener("keydown", keyDown);
+      window.removeEventListener("keyup", keyUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    const mouseWheelEvent = (event: WheelEvent) => {
+      if (isAltPressing) {
+        event.preventDefault();
+        if (event.deltaY > 0) {
+          setScale((x) => x - 0.1);
+        }
+
+        if (event.deltaY < 0) {
+          setScale((x) => x + 0.1);
+        }
+      }
+    };
+    window.addEventListener("wheel", mouseWheelEvent, { passive: false });
+
+    return () => window.removeEventListener("wheel", mouseWheelEvent);
+  }, [isAltPressing]);
 
   console.log({ state, dot1 });
   // TODO canvas or DOM?
