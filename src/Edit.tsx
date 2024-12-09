@@ -18,11 +18,21 @@ function scaleReducer(x: number, actionOrValue: ScaleAction) {
   }
 }
 
+function readFromLocalStorage(key: string, setter: (value: any) => void) {
+  let value;
+  try {
+    value = JSON.parse(localStorage.getItem(key) ?? "null");
+    if (value) {
+      setter(value);
+    }
+  } catch (e) {}
+}
+
 function Edit() {
   // START, DOT1, DOT2
   // SELECTING (for copying, deleting)
   // SELECTING_DOT1, SELECTING_DOT2?
-  const [state, setState] = useState("START");
+  const [state, setState] = useState<"DOT1_START" | "DOT1_END">("DOT1_START");
   const [dot1, setDot1] = useState<{ x: number; y: number } | null>(null);
   const [dot2, setDot2] = useState<{ x: number; y: number } | null>(null);
 
@@ -30,6 +40,30 @@ function Edit() {
   const divEl = useRef<HTMLDivElement>(null);
 
   const [scale, setScale] = useReducer(scaleReducer, 1);
+
+  const initRef = useRef(false);
+
+  useEffect(() => {
+    if (!initRef.current) {
+      readFromLocalStorage("state", setState);
+      readFromLocalStorage("state_dot1", setDot1);
+      readFromLocalStorage("state_dot2", setDot2);
+      readFromLocalStorage("state_blocks", setBlocks);
+      readFromLocalStorage("state_scale", setScale);
+
+      initRef.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (initRef.current) {
+      localStorage.setItem("state", JSON.stringify(state));
+      localStorage.setItem("state_dot1", JSON.stringify(dot1));
+      localStorage.setItem("state_dot2", JSON.stringify(dot2));
+      localStorage.setItem("state_blocks", JSON.stringify(blocks));
+      localStorage.setItem("state_scale", JSON.stringify(scale));
+    }
+  }, [blocks, dot1, dot2, scale, state]);
 
   useEffect(() => {
     window.addEventListener("resize", () => {
@@ -50,11 +84,36 @@ function Edit() {
       if (event.key === "0" && event.altKey) {
         setScale(1);
       }
+
+      console.log(event.key, state);
+
+      if (state === "DOT1_START") {
+        event.preventDefault();
+        if (event.key === "ArrowUp") {
+          setDot1((dot1) => dot1 && { x: dot1.x, y: dot1.y - 1 });
+        }
+
+        if (event.key === "ArrowDown") {
+          setDot1((dot1) => dot1 && { x: dot1.x, y: dot1.y + 1 });
+        }
+
+        if (event.key === "ArrowLeft") {
+          setDot1((dot1) => dot1 && { x: dot1.x - 1, y: dot1.y });
+        }
+
+        if (event.key === "ArrowRight") {
+          setDot1((dot1) => dot1 && { x: dot1.x + 1, y: dot1.y });
+        }
+
+        if (event.key === "Enter") {
+          setState("DOT1_END");
+        }
+      }
     };
     window.addEventListener("keydown", keyBoardEvent);
 
     return () => window.removeEventListener("keydown", keyBoardEvent);
-  }, []);
+  }, [state]);
 
   useEffect(() => {
     const mouseWheelEvent = (event: WheelEvent) => {
@@ -113,12 +172,26 @@ function Edit() {
         }}
         onClick={(event) => {
           if (layoutRef.current) {
-            const { x, y } = layoutRef.current.getBoundingClientRect();
-            setDot1({
-              x: (event.clientX - x) / scale,
-              y: (event.clientY - y) / scale,
-            });
-            setState("DOT1");
+            switch (state) {
+              case "DOT1_START": {
+                const { x, y } = layoutRef.current.getBoundingClientRect();
+                setDot1({
+                  x: (event.clientX - x) / scale,
+                  y: (event.clientY - y) / scale,
+                });
+                setState("DOT1_START");
+                break;
+              }
+              // case "DOT1": {
+              //   const { x, y } = layoutRef.current.getBoundingClientRect();
+              //   setDot2({
+              //     x: (event.clientX - x) / scale,
+              //     y: (event.clientY - y) / scale,
+              //   });
+              //   setState("DOT2");
+              //   break;
+              // }
+            }
           }
         }}
       >
@@ -135,11 +208,11 @@ function Edit() {
         />
         {dot1 && (
           <div
-            className="absolute z-10 border-2"
+            className={`absolute z-10 w-[3px] h-[3px] ${
+              state === "DOT1_START" ? "bg-blue-700" : "bg-green-700"
+            }`}
             style={{ top: dot1.y, left: dot1.x }}
-          >
-            dot1
-          </div>
+          ></div>
         )}
       </div>
     </>
