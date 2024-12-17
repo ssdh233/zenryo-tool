@@ -28,15 +28,17 @@ function readFromLocalStorage(key: string, setter: (value: any) => void) {
   } catch (e) {}
 }
 
+type Axis = { x: number; y: number };
+
 function Edit() {
   // START, DOT1, DOT2
   // SELECTING (for copying, deleting)
   // SELECTING_DOT1, SELECTING_DOT2?
-  const [state, setState] = useState<"DOT1_START" | "DOT1_END">("DOT1_START");
-  const [dot1, setDot1] = useState<{ x: number; y: number } | null>(null);
-  const [dot2, setDot2] = useState<{ x: number; y: number } | null>(null);
+  const [state, setState] = useState<"DOT1" | "DOT2">("DOT1");
+  const [dot1, setDot1] = useState<Axis | null>(null);
+  const [dot2, setDot2] = useState<Axis | null>(null);
 
-  const [blocks, setBlocks] = useState([]);
+  const [blocks, setBlocks] = useState<{ dot1: Axis; dot2: Axis }[]>([]);
   const divEl = useRef<HTMLDivElement>(null);
 
   const [scale, setScale] = useReducer(scaleReducer, 1);
@@ -87,7 +89,7 @@ function Edit() {
 
       console.log(event.key, state);
 
-      if (state === "DOT1_START") {
+      if (state === "DOT1") {
         event.preventDefault();
         if (event.key === "ArrowUp") {
           setDot1((dot1) => dot1 && { x: dot1.x, y: dot1.y - 1 });
@@ -106,7 +108,34 @@ function Edit() {
         }
 
         if (event.key === "Enter") {
-          setState("DOT1_END");
+          setState("DOT2");
+        }
+      }
+
+      if (state === "DOT2") {
+        event.preventDefault();
+        if (event.key === "ArrowUp") {
+          setDot2((dot2) => dot2 && { x: dot2.x, y: dot2.y - 1 });
+        }
+
+        if (event.key === "ArrowDown") {
+          setDot2((dot2) => dot2 && { x: dot2.x, y: dot2.y + 1 });
+        }
+
+        if (event.key === "ArrowLeft") {
+          setDot2((dot2) => dot2 && { x: dot2.x - 1, y: dot2.y });
+        }
+
+        if (event.key === "ArrowRight") {
+          setDot2((dot2) => dot2 && { x: dot2.x + 1, y: dot2.y });
+        }
+
+        if (event.key === "Enter") {
+          if (dot1 && dot2) {
+            setBlocks((blocks) => [...blocks, { dot1, dot2 }]);
+            setDot1(null);
+            setDot2(null);
+          }
         }
       }
     };
@@ -173,13 +202,20 @@ function Edit() {
         onClick={(event) => {
           if (layoutRef.current) {
             switch (state) {
-              case "DOT1_START": {
+              case "DOT1": {
                 const { x, y } = layoutRef.current.getBoundingClientRect();
                 setDot1({
                   x: (event.clientX - x) / scale,
                   y: (event.clientY - y) / scale,
                 });
-                setState("DOT1_START");
+                break;
+              }
+              case "DOT2": {
+                const { x, y } = layoutRef.current.getBoundingClientRect();
+                setDot2({
+                  x: (event.clientX - x) / scale,
+                  y: (event.clientY - y) / scale,
+                });
                 break;
               }
               // case "DOT1": {
@@ -209,11 +245,34 @@ function Edit() {
         {dot1 && (
           <div
             className={`absolute z-10 w-[3px] h-[3px] ${
-              state === "DOT1_START" ? "bg-blue-700" : "bg-green-700"
+              state === "DOT1" ? "bg-blue-700" : "bg-green-700"
             }`}
             style={{ top: dot1.y, left: dot1.x }}
           ></div>
         )}
+        {dot2 && (
+          <div
+            className={`absolute z-10 w-[3px] h-[3px] ${
+              state === "DOT2" ? "bg-blue-700" : "bg-green-700"
+            }`}
+            style={{ top: dot2.y, left: dot2.x }}
+          ></div>
+        )}
+        {blocks.length > 0 &&
+          blocks.map(({ dot1, dot2 }, i) => (
+            <div
+              className={`absolute z-10 border-2 border-blue-700 border-dashed box-content`}
+              key={i}
+              style={{
+                left: dot1.x,
+                top: dot1.y,
+                width: dot2.x - dot1.x,
+                height: dot2.y - dot1.y,
+              }}
+            >
+              block
+            </div>
+          ))}
       </div>
     </>
   );
