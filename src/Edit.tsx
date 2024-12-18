@@ -1,6 +1,6 @@
 import { Button } from "./components/ui/button";
 import { useEffect, useReducer, useRef, useState } from "react";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, Square } from "lucide-react";
 
 type ScaleAction = "+0.1" | "+1" | "-0.1" | "-1" | number;
 function scaleReducer(x: number, actionOrValue: ScaleAction) {
@@ -34,7 +34,7 @@ function Edit() {
   // START, DOT1, DOT2
   // SELECTING (for copying, deleting)
   // SELECTING_DOT1, SELECTING_DOT2?
-  const [state, setState] = useState<"DOT1" | "DOT2">("DOT1");
+  const [state, setState] = useState<"DEFAULT" | "DOT1" | "DOT2">("DEFAULT");
   const [dot1, setDot1] = useState<Axis | null>(null);
   const [dot2, setDot2] = useState<Axis | null>(null);
 
@@ -135,6 +135,7 @@ function Edit() {
             setBlocks((blocks) => [...blocks, { dot1, dot2 }]);
             setDot1(null);
             setDot2(null);
+            setState("DEFAULT");
           }
         }
       }
@@ -142,13 +143,13 @@ function Edit() {
     window.addEventListener("keydown", keyBoardEvent);
 
     return () => window.removeEventListener("keydown", keyBoardEvent);
-  }, [state]);
+  }, [dot1, dot2, state]);
 
   useEffect(() => {
     const mouseWheelEvent = (event: WheelEvent) => {
-      event.preventDefault();
-
       if (event.altKey) {
+        event.preventDefault();
+
         if (event.deltaY > 0) {
           if (event.ctrlKey) {
             setScale("-1");
@@ -190,6 +191,22 @@ function Edit() {
         </Button>
         <Button variant="ghost" size="icon" onClick={() => setScale("+1")}>
           <Plus />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            if (state === "DEFAULT") {
+              setState("DOT1");
+            }
+          }}
+          className={
+            state === "DOT1" || state === "DOT2"
+              ? "bg-gray-300 hover:bg-gray-300"
+              : ""
+          }
+        >
+          <Square />
         </Button>
       </div>
       <div
@@ -269,9 +286,7 @@ function Edit() {
                 width: dot2.x - dot1.x,
                 height: dot2.y - dot1.y,
               }}
-            >
-              block
-            </div>
+            ></div>
           ))}
       </div>
     </>
