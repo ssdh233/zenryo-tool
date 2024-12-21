@@ -1,6 +1,15 @@
 import { Button } from "./components/ui/button";
 import { useEffect, useReducer, useRef, useState } from "react";
-import { Minus, Plus, Square, Trash2 } from "lucide-react";
+import {
+  ArrowDownFromLine,
+  ArrowRightFromLine,
+  Minus,
+  Plus,
+  Square,
+  Trash2,
+  X,
+} from "lucide-react";
+import { Separator } from "./components/ui/separator";
 
 type ScaleAction = "+0.1" | "+1" | "-0.1" | "-1" | number;
 function scaleReducer(x: number, actionOrValue: ScaleAction) {
@@ -39,10 +48,9 @@ function Edit() {
   const [dot2, setDot2] = useState<Axis | null>(null);
 
   const [blocks, setBlocks] = useState<{ dot1: Axis; dot2: Axis }[]>([]);
-  console.log({ blocks });
 
   const [scale, setScale] = useReducer(scaleReducer, 1);
-  const [selectedBlocks, setSeletectBlocks] = useState<number[]>([]);
+  const [selectedBlockIndexes, setSeletectBlocks] = useState<number[]>([]);
 
   const initRef = useRef(false);
 
@@ -185,44 +193,114 @@ function Edit() {
         <Button variant="ghost" size="icon" onClick={() => setScale("+1")}>
           <Plus />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            if (state === "DEFAULT") {
-              setState("DOT1");
-            }
+        <Separator orientation="vertical" className="h-5 mx-1" />
+        {selectedBlockIndexes.length === 0 && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              if (state === "DEFAULT") {
+                setState("DOT1");
+              }
 
-            if (state === "DOT1" || state === "DOT2") {
-              setState("DEFAULT");
-              setDot1(null);
-              setDot2(null);
+              if (state === "DOT1" || state === "DOT2") {
+                setState("DEFAULT");
+                setDot1(null);
+                setDot2(null);
+              }
+            }}
+            className={
+              state === "DOT1" || state === "DOT2"
+                ? "bg-gray-300 hover:bg-gray-300"
+                : ""
             }
-          }}
-          className={
-            state === "DOT1" || state === "DOT2"
-              ? "bg-gray-300 hover:bg-gray-300"
-              : ""
-          }
-        >
-          <Square />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            setBlocks(() => {
-              const newBlocks = blocks.slice(0);
-              selectedBlocks.forEach((i) => {
-                delete newBlocks[i];
-              });
-              return newBlocks.filter((x) => x);
-            });
-            setSeletectBlocks([]);
-          }}
-        >
-          <Trash2 />
-        </Button>
+          >
+            <Square />
+          </Button>
+        )}
+        {selectedBlockIndexes.length > 0 && (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setSeletectBlocks([]);
+              }}
+            >
+              <X />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setBlocks((blocks) => {
+                  const newBlocks = [...blocks];
+                  selectedBlockIndexes.forEach((i) => {
+                    const selectedBlock = blocks[i];
+                    newBlocks.push({
+                      dot1: {
+                        x: selectedBlock.dot1.x,
+                        y: selectedBlock.dot2.y,
+                      },
+                      dot2: {
+                        x: selectedBlock.dot2.x,
+                        y: selectedBlock.dot2.y * 2 - selectedBlock.dot1.y,
+                      },
+                    });
+                  });
+
+                  return newBlocks;
+                });
+                setSeletectBlocks([]);
+              }}
+            >
+              <ArrowDownFromLine />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setBlocks((blocks) => {
+                  const newBlocks = [...blocks];
+                  selectedBlockIndexes.forEach((i) => {
+                    const selectedBlock = blocks[i];
+                    newBlocks.push({
+                      dot1: {
+                        x: selectedBlock.dot2.x,
+                        y: selectedBlock.dot1.y,
+                      },
+                      dot2: {
+                        x: selectedBlock.dot2.x * 2 - selectedBlock.dot1.x,
+                        y: selectedBlock.dot2.y,
+                      },
+                    });
+                  });
+
+                  return newBlocks;
+                });
+                setSeletectBlocks([]);
+              }}
+            >
+              <ArrowRightFromLine />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setBlocks(() => {
+                  const newBlocks = blocks.slice(0);
+                  selectedBlockIndexes.forEach((i) => {
+                    delete newBlocks[i];
+                  });
+                  return newBlocks.filter((x) => x);
+                });
+                setSeletectBlocks([]);
+              }}
+            >
+              <Trash2 />
+            </Button>
+          </>
+        )}
       </div>
       <div
         className="relative mt-[46px]"
@@ -289,10 +367,10 @@ function Edit() {
         {blocks.length > 0 &&
           blocks.map(({ dot1, dot2 }, i) => (
             <div
-              className={`absolute z-10 border-[1px] ${
-                selectedBlocks.includes(i)
-                  ? "border-yellow-300"
-                  : "border-green-700"
+              className={`absolute border-[1px] ${
+                selectedBlockIndexes.includes(i)
+                  ? "border-yellow-300 z-20"
+                  : "border-green-700 z-10"
               } border-dashed box-border`}
               key={i}
               style={{
