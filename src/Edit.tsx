@@ -1,6 +1,6 @@
 import { Button } from "./components/ui/button";
 import { useEffect, useReducer, useRef, useState } from "react";
-import { Minus, Plus, Square } from "lucide-react";
+import { Minus, Plus, Square, Trash2 } from "lucide-react";
 
 type ScaleAction = "+0.1" | "+1" | "-0.1" | "-1" | number;
 function scaleReducer(x: number, actionOrValue: ScaleAction) {
@@ -39,9 +39,10 @@ function Edit() {
   const [dot2, setDot2] = useState<Axis | null>(null);
 
   const [blocks, setBlocks] = useState<{ dot1: Axis; dot2: Axis }[]>([]);
-  const divEl = useRef<HTMLDivElement>(null);
+  console.log({ blocks });
 
   const [scale, setScale] = useReducer(scaleReducer, 1);
+  const [selectedBlocks, setSeletectBlocks] = useState<number[]>([]);
 
   const initRef = useRef(false);
 
@@ -68,12 +69,6 @@ function Edit() {
   }, [blocks, dot1, dot2, scale, state]);
 
   useEffect(() => {
-    window.addEventListener("resize", () => {
-      console.log(divEl.current?.getBoundingClientRect().width);
-    });
-  });
-
-  useEffect(() => {
     const keyBoardEvent = (event: KeyboardEvent) => {
       if (event.key === ".") {
         setScale("+0.1");
@@ -86,8 +81,6 @@ function Edit() {
       if (event.key === "0" && event.altKey) {
         setScale(1);
       }
-
-      console.log(event.key, state);
 
       if (state === "DOT1") {
         event.preventDefault();
@@ -176,7 +169,7 @@ function Edit() {
 
   return (
     <>
-      <div className="flex items-center border-b-2 p-1">
+      <div className="flex items-center border-b-2 p-1 fixed w-full z-50 bg-white top-0">
         <Button variant="ghost" size="icon" onClick={() => setScale("-1")}>
           <Minus />
         </Button>
@@ -199,6 +192,12 @@ function Edit() {
             if (state === "DEFAULT") {
               setState("DOT1");
             }
+
+            if (state === "DOT1" || state === "DOT2") {
+              setState("DEFAULT");
+              setDot1(null);
+              setDot2(null);
+            }
           }}
           className={
             state === "DOT1" || state === "DOT2"
@@ -208,9 +207,25 @@ function Edit() {
         >
           <Square />
         </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            setBlocks(() => {
+              const newBlocks = blocks.slice(0);
+              selectedBlocks.forEach((i) => {
+                delete newBlocks[i];
+              });
+              return newBlocks.filter((x) => x);
+            });
+            setSeletectBlocks([]);
+          }}
+        >
+          <Trash2 />
+        </Button>
       </div>
       <div
-        className="relative"
+        className="relative mt-[46px]"
         ref={layoutRef}
         style={{
           transformOrigin: "top left",
@@ -222,28 +237,19 @@ function Edit() {
               case "DOT1": {
                 const { x, y } = layoutRef.current.getBoundingClientRect();
                 setDot1({
-                  x: (event.clientX - x) / scale,
-                  y: (event.clientY - y) / scale,
+                  x: Math.round((event.clientX - x) / scale),
+                  y: Math.round((event.clientY - y) / scale),
                 });
                 break;
               }
               case "DOT2": {
                 const { x, y } = layoutRef.current.getBoundingClientRect();
                 setDot2({
-                  x: (event.clientX - x) / scale,
-                  y: (event.clientY - y) / scale,
+                  x: Math.round((event.clientX - x) / scale),
+                  y: Math.round((event.clientY - y) / scale),
                 });
                 break;
               }
-              // case "DOT1": {
-              //   const { x, y } = layoutRef.current.getBoundingClientRect();
-              //   setDot2({
-              //     x: (event.clientX - x) / scale,
-              //     y: (event.clientY - y) / scale,
-              //   });
-              //   setState("DOT2");
-              //   break;
-              // }
             }
           }
         }}
@@ -252,39 +258,61 @@ function Edit() {
           src="https://pbs.twimg.com/media/FH2n81tacAY4oxl?format=jpg&name=large"
           // src="https://pbs.twimg.com/media/GQmM9GtakAAC8lm?format=jpg&name=large"
           alt="target"
-          style={
-            {
-              // width: `${Math.round(Math.floor(scale * 1000) / 10)}%`,
-              // maxWidth: `${Math.round(Math.floor(scale * 1000) / 10)}%`,
-            }
-          }
         />
         {dot1 && (
           <div
-            className={`absolute z-10 w-[3px] h-[3px] ${
-              state === "DOT1" ? "bg-blue-700" : "bg-green-700"
+            className={`absolute z-10 w-[3px] h-[3px] border-[1px] ${
+              state === "DOT1" ? "border-blue-700" : "border-green-700"
             }`}
-            style={{ top: dot1.y, left: dot1.x }}
+            style={{ top: dot1.y - 1, left: dot1.x - 1 }}
           ></div>
         )}
         {dot2 && (
           <div
-            className={`absolute z-10 w-[3px] h-[3px] ${
-              state === "DOT2" ? "bg-blue-700" : "bg-green-700"
+            className={`absolute z-10 w-[3px] h-[3px] border-[1px]  ${
+              state === "DOT2" ? "border-blue-700" : "border-green-700"
             }`}
-            style={{ top: dot2.y, left: dot2.x }}
+            style={{ top: dot2.y - 1, left: dot2.x - 1 }}
+          ></div>
+        )}
+        {dot1 && dot2 && state === "DOT2" && (
+          <div
+            className={`absolute z-10 border-[1px] border-blue-700 border-dashed box-border`}
+            style={{
+              left: dot1.x,
+              top: dot1.y,
+              width: dot2.x - dot1.x + 1,
+              height: dot2.y - dot1.y + 1,
+            }}
           ></div>
         )}
         {blocks.length > 0 &&
           blocks.map(({ dot1, dot2 }, i) => (
             <div
-              className={`absolute z-10 border-2 border-blue-700 border-dashed box-content`}
+              className={`absolute z-10 border-[1px] ${
+                selectedBlocks.includes(i)
+                  ? "border-yellow-300"
+                  : "border-green-700"
+              } border-dashed box-border`}
               key={i}
               style={{
                 left: dot1.x,
                 top: dot1.y,
-                width: dot2.x - dot1.x,
-                height: dot2.y - dot1.y,
+                width: dot2.x - dot1.x + 1,
+                height: dot2.y - dot1.y + 1,
+              }}
+              onClick={() => {
+                if (state === "DEFAULT") {
+                  setSeletectBlocks((blocks) => {
+                    const index = blocks.indexOf(i);
+                    console.log({ index });
+                    if (index > -1) {
+                      return blocks.toSpliced(index, 1);
+                    } else {
+                      return [...blocks, i];
+                    }
+                  });
+                }
               }}
             ></div>
           ))}
