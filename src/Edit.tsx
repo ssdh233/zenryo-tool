@@ -3,9 +3,12 @@ import { useEffect, useReducer, useRef, useState } from "react";
 import {
   ArrowDownFromLine,
   ArrowRightFromLine,
+  Blocks,
   Minus,
   Plus,
   Square,
+  SquareDashed,
+  SquarePlus,
   Trash2,
   X,
 } from "lucide-react";
@@ -195,28 +198,41 @@ function Edit() {
         </Button>
         <Separator orientation="vertical" className="h-5 mx-1" />
         {selectedBlockIndexes.length === 0 && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              if (state === "DEFAULT") {
-                setState("DOT1");
-              }
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                if (state === "DEFAULT") {
+                  setState("DOT1");
+                }
 
-              if (state === "DOT1" || state === "DOT2") {
-                setState("DEFAULT");
-                setDot1(null);
-                setDot2(null);
+                if (state === "DOT1" || state === "DOT2") {
+                  setState("DEFAULT");
+                  setDot1(null);
+                  setDot2(null);
+                }
+              }}
+              className={
+                state === "DOT1" || state === "DOT2"
+                  ? "bg-gray-300 hover:bg-gray-300"
+                  : ""
               }
-            }}
-            className={
-              state === "DOT1" || state === "DOT2"
-                ? "bg-gray-300 hover:bg-gray-300"
-                : ""
-            }
-          >
-            <Square />
-          </Button>
+            >
+              <SquareDashed />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setSeletectBlocks(
+                  new Array(blocks.length).fill(0).map((_, i) => i)
+                );
+              }}
+            >
+              <Blocks />
+            </Button>
+          </>
         )}
         {selectedBlockIndexes.length > 0 && (
           <>
@@ -234,24 +250,27 @@ function Edit() {
               size="icon"
               onClick={() => {
                 setBlocks((blocks) => {
+                  const newSelectedBlocks = [] as number[];
                   const newBlocks = [...blocks];
                   selectedBlockIndexes.forEach((i) => {
                     const selectedBlock = blocks[i];
-                    newBlocks.push({
-                      dot1: {
-                        x: selectedBlock.dot1.x,
-                        y: selectedBlock.dot2.y,
-                      },
-                      dot2: {
-                        x: selectedBlock.dot2.x,
-                        y: selectedBlock.dot2.y * 2 - selectedBlock.dot1.y,
-                      },
-                    });
+                    const newBlockIndex =
+                      newBlocks.push({
+                        dot1: {
+                          x: selectedBlock.dot1.x,
+                          y: selectedBlock.dot2.y,
+                        },
+                        dot2: {
+                          x: selectedBlock.dot2.x,
+                          y: selectedBlock.dot2.y * 2 - selectedBlock.dot1.y,
+                        },
+                      }) - 1;
+                    newSelectedBlocks.push(newBlockIndex);
                   });
+                  setSeletectBlocks(newSelectedBlocks);
 
                   return newBlocks;
                 });
-                setSeletectBlocks([]);
               }}
             >
               <ArrowDownFromLine />
@@ -261,24 +280,27 @@ function Edit() {
               size="icon"
               onClick={() => {
                 setBlocks((blocks) => {
+                  const newSelectedBlocks = [] as number[];
                   const newBlocks = [...blocks];
                   selectedBlockIndexes.forEach((i) => {
                     const selectedBlock = blocks[i];
-                    newBlocks.push({
-                      dot1: {
-                        x: selectedBlock.dot2.x,
-                        y: selectedBlock.dot1.y,
-                      },
-                      dot2: {
-                        x: selectedBlock.dot2.x * 2 - selectedBlock.dot1.x,
-                        y: selectedBlock.dot2.y,
-                      },
-                    });
+                    const newBlockIndex =
+                      newBlocks.push({
+                        dot1: {
+                          x: selectedBlock.dot2.x,
+                          y: selectedBlock.dot1.y,
+                        },
+                        dot2: {
+                          x: selectedBlock.dot2.x * 2 - selectedBlock.dot1.x,
+                          y: selectedBlock.dot2.y,
+                        },
+                      }) - 1;
+                    newSelectedBlocks.push(newBlockIndex);
                   });
+                  setSeletectBlocks(newSelectedBlocks);
 
                   return newBlocks;
                 });
-                setSeletectBlocks([]);
               }}
             >
               <ArrowRightFromLine />
