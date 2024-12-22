@@ -4,15 +4,26 @@ import {
   ArrowDownFromLine,
   ArrowRightFromLine,
   Blocks,
+  Copy,
   Minus,
   Plus,
-  Square,
+  SquareArrowOutUpRight,
   SquareDashed,
-  SquarePlus,
   Trash2,
   X,
 } from "lucide-react";
 import { Separator } from "./components/ui/separator";
+import {
+  Dialog,
+  DialogHeader,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "./components/ui/dialog";
+
+import LZString from "lz-string";
+
+import { Input } from "./components/ui/input";
 
 type ScaleAction = "+0.1" | "+1" | "-0.1" | "-1" | number;
 function scaleReducer(x: number, actionOrValue: ScaleAction) {
@@ -143,11 +154,37 @@ function Edit() {
           }
         }
       }
+
+      if (state === "DEFAULT") {
+        event.preventDefault();
+        setBlocks((blocks) => {
+          const newBlocks = [...blocks];
+          selectedBlockIndexes.forEach((index) => {
+            if (event.key === "ArrowUp") {
+              newBlocks[index].dot1.y = newBlocks[index].dot1.y - 1;
+              newBlocks[index].dot2.y = newBlocks[index].dot2.y - 1;
+            }
+            if (event.key === "ArrowDown") {
+              newBlocks[index].dot1.y = newBlocks[index].dot1.y + 1;
+              newBlocks[index].dot2.y = newBlocks[index].dot2.y + 1;
+            }
+            if (event.key === "ArrowLeft") {
+              newBlocks[index].dot1.x = newBlocks[index].dot1.x - 1;
+              newBlocks[index].dot2.x = newBlocks[index].dot2.x - 1;
+            }
+            if (event.key === "ArrowRight") {
+              newBlocks[index].dot1.x = newBlocks[index].dot1.x + 1;
+              newBlocks[index].dot2.x = newBlocks[index].dot2.x + 1;
+            }
+          });
+          return newBlocks;
+        });
+      }
     };
     window.addEventListener("keydown", keyBoardEvent);
 
     return () => window.removeEventListener("keydown", keyBoardEvent);
-  }, [dot1, dot2, state]);
+  }, [dot1, dot2, selectedBlockIndexes, state]);
 
   useEffect(() => {
     const mouseWheelEvent = (event: WheelEvent) => {
@@ -323,6 +360,50 @@ function Edit() {
             </Button>
           </>
         )}
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <SquareArrowOutUpRight />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Share link</DialogTitle>
+            </DialogHeader>
+            <div className="flex items-center space-x-2">
+              <div className="grid flex-1 gap-2">
+                <Input
+                  id="link"
+                  defaultValue={
+                    window.location.protocol +
+                    "//" +
+                    window.location.host +
+                    window.location.pathname +
+                    `?blocks=${LZString.compressToBase64(
+                      blocks
+                        .map(
+                          (b) =>
+                            b.dot1.x +
+                            "," +
+                            b.dot1.y +
+                            "," +
+                            b.dot2.x +
+                            "," +
+                            b.dot2.x
+                        )
+                        .join(",")
+                    )}`
+                  }
+                  readOnly
+                />
+              </div>
+              <Button type="submit" size="sm" className="px-3">
+                <span className="sr-only">Copy</span>
+                <Copy />
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
       <div
         className="relative mt-[46px]"
