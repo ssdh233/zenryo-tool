@@ -1,5 +1,6 @@
 import "./App.css";
 import Edit from "./Edit";
+import View from "./View";
 
 function App() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -9,17 +10,7 @@ function App() {
       {isEdit ? (
         <Edit />
       ) : (
-        <div>
-          Not in edit mode.{" "}
-          <button
-            onClick={() => {
-              urlParams.set("edit", "1");
-              window.location.search = urlParams.toString();
-            }}
-          >
-            Go to Edit
-          </button>
-        </div>
+        <View />
       )}
     </div>
   );

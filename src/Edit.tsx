@@ -20,10 +20,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./components/ui/dialog";
-
 import LZString from "lz-string";
 
 import { Input } from "./components/ui/input";
+import { Axis, Block } from "./types";
 
 type ScaleAction = "+0.1" | "+1" | "-0.1" | "-1" | number;
 function scaleReducer(x: number, actionOrValue: ScaleAction) {
@@ -51,8 +51,6 @@ function readFromLocalStorage(key: string, setter: (value: any) => void) {
   } catch (e) {}
 }
 
-type Axis = { x: number; y: number };
-
 function Edit() {
   // START, DOT1, DOT2
   // SELECTING (for copying, deleting)
@@ -61,7 +59,7 @@ function Edit() {
   const [dot1, setDot1] = useState<Axis | null>(null);
   const [dot2, setDot2] = useState<Axis | null>(null);
 
-  const [blocks, setBlocks] = useState<{ dot1: Axis; dot2: Axis }[]>([]);
+  const [blocks, setBlocks] = useState<Block[]>([]);
 
   const [scale, setScale] = useReducer(scaleReducer, 1);
   const [selectedBlockIndexes, setSeletectBlocks] = useState<number[]>([]);
@@ -379,20 +377,18 @@ function Edit() {
                     "//" +
                     window.location.host +
                     window.location.pathname +
-                    `?blocks=${LZString.compressToBase64(
-                      blocks
-                        .map(
-                          (b) =>
-                            b.dot1.x +
-                            "," +
-                            b.dot1.y +
-                            "," +
-                            b.dot2.x +
-                            "," +
-                            b.dot2.x
-                        )
-                        .join(",")
-                    )}`
+                    `?blocks=${blocks
+                      .map(
+                        (b) =>
+                          b.dot1.x +
+                          "," +
+                          b.dot1.y +
+                          "," +
+                          b.dot2.x +
+                          "," +
+                          b.dot2.y
+                      )
+                      .join(",")}`
                   }
                   readOnly
                 />
