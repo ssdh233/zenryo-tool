@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/umetools/static/css/main.03ba2419.css",
-    "main.js": "/umetools/static/js/main.a802bc11.js",
-    "static/js/453.bec26e62.chunk.js": "/umetools/static/js/453.bec26e62.chunk.js",
-    "index.html": "/umetools/index.html",
-    "main.03ba2419.css.map": "/umetools/static/css/main.03ba2419.css.map",
-    "main.a802bc11.js.map": "/umetools/static/js/main.a802bc11.js.map",
-    "453.bec26e62.chunk.js.map": "/umetools/static/js/453.bec26e62.chunk.js.map"
+    "main.css": "/umetool/static/css/main.03ba2419.css",
+    "main.js": "/umetool/static/js/main.9aed3672.js",
+    "static/js/453.bec26e62.chunk.js": "/umetool/static/js/453.bec26e62.chunk.js",
+    "index.html": "/umetool/index.html",
+    "main.03ba2419.css.map": "/umetool/static/css/main.03ba2419.css.map",
+    "main.9aed3672.js.map": "/umetool/static/js/main.9aed3672.js.map",
+    "453.bec26e62.chunk.js.map": "/umetool/static/js/453.bec26e62.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.03ba2419.css",
-    "static/js/main.a802bc11.js"
+    "static/js/main.9aed3672.js"
   ]
 }
