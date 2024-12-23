@@ -24,6 +24,7 @@ import LZString from "lz-string";
 
 import { Input } from "./components/ui/input";
 import { Axis, Block } from "./types";
+import { bts } from "./lib/compress";
 
 type ScaleAction = "+0.1" | "+1" | "-0.1" | "-1" | number;
 function scaleReducer(x: number, actionOrValue: ScaleAction) {
@@ -377,18 +378,7 @@ function Edit() {
                     "//" +
                     window.location.host +
                     window.location.pathname +
-                    `?blocks=${blocks
-                      .map(
-                        (b) =>
-                          b.dot1.x +
-                          "," +
-                          b.dot1.y +
-                          "," +
-                          b.dot2.x +
-                          "," +
-                          b.dot2.y
-                      )
-                      .join(",")}`
+                    `?blocks=${bts(blocks)}`
                   }
                   readOnly
                 />

@@ -1,30 +1,16 @@
-import LZString from "lz-string";
 import { useMemo, useState } from "react";
 import { Block } from "./types";
+import { stb } from "./lib/compress";
 
 function View() {
   const blocks = useMemo(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const blocksRawBase64 = searchParams.get("blocks");
+    const blocksData = searchParams.get("blocks");
 
     let blocks: Block[] = [];
-    if (blocksRawBase64) {
-      const blocksRaw = blocksRawBase64?.split(",");
 
-      if (blocksRaw) {
-        for (let i = 0; i < blocksRaw.length / 4; i++) {
-          blocks.push({
-            dot1: {
-              x: Number(blocksRaw[i * 4]),
-              y: Number(blocksRaw[i * 4 + 1]),
-            },
-            dot2: {
-              x: Number(blocksRaw[i * 4 + 2]),
-              y: Number(blocksRaw[i * 4 + 3]),
-            },
-          });
-        }
-      }
+    if (blocksData) {
+      blocks = stb(blocksData);
     }
 
     return blocks;
@@ -41,7 +27,9 @@ function View() {
       {blocks.length > 0 &&
         blocks.map(({ dot1, dot2 }, i) => (
           <div
-            className={`absolute z-10 ${blockState[i] ? "bg-yellow-300/50" : ""}`}
+            className={`absolute z-10 ${
+              blockState[i] ? "bg-yellow-300/50" : ""
+            }`}
             key={i}
             style={{
               left: dot1.x,
