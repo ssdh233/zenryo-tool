@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/umetool/static/css/main.ac7034de.css",
-    "main.js": "/umetool/static/js/main.93b420fa.js",
+    "main.js": "/umetool/static/js/main.0dd1738c.js",
     "static/js/453.bec26e62.chunk.js": "/umetool/static/js/453.bec26e62.chunk.js",
     "index.html": "/umetool/index.html",
     "main.ac7034de.css.map": "/umetool/static/css/main.ac7034de.css.map",
-    "main.93b420fa.js.map": "/umetool/static/js/main.93b420fa.js.map",
+    "main.0dd1738c.js.map": "/umetool/static/js/main.0dd1738c.js.map",
     "453.bec26e62.chunk.js.map": "/umetool/static/js/453.bec26e62.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.ac7034de.css",
-    "static/js/main.93b420fa.js"
+    "static/js/main.0dd1738c.js"
   ]
 }
